@@ -2,6 +2,7 @@
 def initialize(context):
     #SET BENCHMARK: STOCK WE ARE COMPARING OUR RESULTS TO
     set_benchmark(sid(24))
+    context.aapl=sid(24)
     
     #Call update everyday, at market open
     schedule_function(updateFunction, date_rules.every_day(), time_rules.market_open(hours=1))
