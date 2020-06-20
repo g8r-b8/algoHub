@@ -1,0 +1,53 @@
+#When algorithm just starts, do this:
+def initialize(context):
+    #SET BENCHMARK: STOCK WE ARE COMPARING OUR RESULTS TO
+    set_benchmark(sid(24))
+    context.aapl=sid(24)
+    
+    #Call update everyday, at market open
+    #note, can be every minute, and in industry, every picosecond
+    schedule_function(updateFunction, date_rules.every_day(), time_rules.market_open(hours=1))
+   
+    
+    
+#When Update is called, do this:    
+def updateFunction(context, data):
+
+    #Assign relevant variables to make code less robust; easier
+    openList = data.history(context.aapl, 'open', 50, '1d')
+    closedList = data.history(context.aapl, 'close', 50, '1d')
+    lowList = data.history(context.aapl, 'low', 50, '1d')
+    highList = data.history(context.aapl, 'high', 50, '1d')
+    
+    #Shift list to compare a days prices, to it's previous days
+    #price
+    #for example, see today's price, and compare it to yesterday's
+    shiftOpen = openList
+    shiftOpen.truncate(1, 49)
+    
+    shiftClosed = closedList
+    shiftClosed.truncate(1, 49)
+    
+    shiftHigh = highList
+    shiftHigh.truncate(1, 49)
+    
+    shiftLow = lowList
+    shiftLow.truncate(1, 49)
+    
+    #Make Heiken Ashi Candlesticks
+    HA_close = (1.00/4.00)*(openList+closedList+lowList+highList)
+    HA_open = (openList+closedList)/2.00
+    
+    
+    
+    
+    open_orders = get_open_orders()
+
+    #Buy if up 4 days in a row
+    if HA_close[0]>HA_close[-1]>HA_close[-2]>HA_close[-3]:
+        order_target_percent(context.aapl, 01.00)
+     
+    #Sell if down 3 days in a row 
+    elif HA_close[0]<HA_close[-1]<HA_close[-2]:
+        if context.aapl not in open_orders:
+            order_target_percent(context.aapl, -0.33)
