@@ -1,0 +1,77 @@
+-prog ass 
+--SPIM for MIPS sim
+--most of the code is in the slides
+--rly just ab getting env up n running
+
+
+CHAPTER 3
+-arithmetic in MIPS
+-computers compute
+-- + - * / () [] ^ s d/dx
+-addn considering carry dig
+--now considering base n
+-- after 10 in base 10 we have an carry buffer
+--after 2 in base 2 we get an carry flag
+------- add bbitwise + carry then reset carry
+
+-----overflow only occurs when out of WORDspace or DWORDspace
+NOTE: half adder truth table
+--2 input, 2 output
+--ret (sum, carry flag)
+
+ALSO have full adders
+-takes 3 input and gives 2 out
+--takes a, b el of A,B el of Binary, and also takes carry flag
+--returns sum and carry
+
+fuck subtracion
+addn of neg num!!
+*2s compliment*
+
+overflow case:
+if neg then overflow
+edgecase!!!
+only some javas raise exception
+
+mult
+MAX LENGTH IS THE SUM OF OPERAND LENGTHS #numberTheory (max length of digits)
+faster multiplication exists using 'pipeline'
+--performed in parralell
+--we will use two registers HI most sign dig and LO least sig dig
+----highest 32 bit to HI!!!!!!!!!!!!!
+------mfhi __  (move from high)
+----lowest 32 bit to LO !!!!!!!!!!!!!
+------mflo ___ (move from low)
+
+BINARY # SYSTEMS:
+for decimals use negatice exponents
+
+single precision vs double
+-32 vs 64 bits
+
+	DEALING W FRACTIONS AND BINARY WHAAAAAAAAAAAAAT
+	1011...1
+-INFINITY IN BINARY WHAAAA
+-NaN case
+
+IMPORTANT PART:
+adding floating points
+__________________________________________________________________
+-------------------------------------------------------------------
+___________________________________________________________________
+
+New day!!!!!!!!!!!!!!!!!!!!!!!
+
+-remember ab hi and lo registers to get ur product ans
+-float w floaf $fn and int w int
+single precision//lwc1
+single precision//swc1
+double precision//ldc1
+double precision//sdc1
+--can only load floats of sorts
+add.s single prec
+add.d double prec
+c.____.s comparison single point
+--blank filled with less than, equal to, greater than or equal to, etc
+c.eq.s for ex
+
