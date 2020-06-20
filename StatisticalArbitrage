@@ -1,0 +1,119 @@
+
+import pandas as pd
+day=0
+indicator_list = []
+standardized_list = []
+
+def initialize(context):
+    gold = symbol("GLD")
+    
+    set_benchmark(gold)
+    #context.StopLossPct = 0.02
+   
+    aapl=sid(24)
+    schedule_function(data_handling, date_rules.every_day(), time_rules.market_open(hours=4))
+    
+
+    
+    
+def data_handling(context, data):
+  #  myaapl=sid(24)
+    silver = symbol("SLV")
+    gold = symbol("GLD")
+   
+    time_period = 60
+
+
+    gold_price = data.history(gold, 'price', time_period, '1d')
+    silver_price = data.history(silver, 'price', time_period, '1d')
+    
+    
+
+    #making two lists, one for todays prices, and one for yesterdays prices
+    gold_price_shifted_left = gold_price.head(time_period-1)
+    silver_price_shifted_left = silver_price.head(time_period-1)
+    
+    gold_price_shifted_right = gold_price.tail(time_period-1)
+    silver_price_shifted_right = silver_price.tail(time_period-1)
+    
+
+    indicator_list= []
+    
+
+    
+    for i in range(0,time_period-1):
+        prev_gold = gold_price_shifted_right.get_value(i)
+        cur_gold = gold_price_shifted_left.get_value(i)
+        gold_indicator_val = (prev_gold/cur_gold)
+  
+        prev_silver = silver_price_shifted_right.get_value(i)
+        cur_silver = silver_price_shifted_left.get_value(i)
+
+        silver_indicator_val = (prev_silver/cur_silver)
+
+        indicator_val = gold_indicator_val - silver_indicator_val
+        
+        indicator_list.append(indicator_val)
+  
+        if(len(indicator_list)>time_period):
+            indicator_list.pop(time_period)
+
+        indicator_series = pd.Series(indicator_list)
+    
+
+    if(len(indicator_series)>=time_period-1):
+        
+        
+        indicator_std = indicator_series.std()
+        indicator_mean = indicator_series.mean()
+        
+        for e in indicator_list:
+            num = e - indicator_mean
+            std_score = e / indicator_std
+            standardized_list.insert(0,std_score)
+            if(len(standardized_list)>time_period):
+                standardized_list.pop(time_period)
+                
+            standardized_series = pd.Series(standardized_list)
+                
+        standardized_std = standardized_series.std()
+       
+        
+       
+
+        
+
+        mult = 1
+        
+        limit = standardized_std*mult
+        
+        scalar = .1
+        
+        upper_band = limit
+        lower_band = (-1.0*limit)
+        
+        inner_upper_band = scalar* upper_band
+        inner_lower_band = scalar* lower_band
+
+        open_orders = get_open_orders()
+        
+        current_indicator_val = standardized_series.get_value(0)
+        
+        record(top = upper_band, bottom = lower_band)
+        record(difference = current_indicator_val)
+        
+    
+        if current_indicator_val >= upper_band:
+            if gold or silver not in open_orders:
+                order_target_percent(gold, -.5)
+                order_target_percent(silver, .5)
+
+
+        elif current_indicator_val <= lower_band:
+            if gold or silver not in open_orders:
+                order_target_percent(gold, .5)
+                order_target_percent(silver, -0.5)
+        
+        elif current_indicator_val < upper_band * scalar and current_indicator_val > lower_band * scalar:
+            order_target_percent(gold, 0.0)
+            order_target_percent(silver, 0.0)
